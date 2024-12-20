@@ -3,6 +3,7 @@
 #include "Liste.h"
 #include "Utils.h"
 #include "ArgFramework.h"
+// #include "NaiveWay.h"
 int main(int argc, char *argv[])
 {
     if (argc < 4)
@@ -30,11 +31,20 @@ int main(int argc, char *argv[])
     }
 
     createAdjacencyList(filePath, af);
-    for (int i = 0; i < af->nbArg; i++)
-    {
-        printf("Argument %s attacks: ", af->tab[i]);
-        afficheListe(af->listeAdj[i]);
-    }
+
+    /* NaiveWay import
+    printf("Stable Extensions:\n");
+    calculateStableExtensions(af);
+
+    printf("Complete Extensions:\n");
+    calculateCompleteExtensions(af);
+    */
+   
+    /* cycle detection
+    int cycle = 0;
+    parcoursProfondeur(0, af, &cycle);
+    printf("Detection cycle : %s\n", cycle == 1 ? "true" : "false");
+    */
 
     free(labels);
     freeArgFramework(af);

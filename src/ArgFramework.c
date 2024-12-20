@@ -26,12 +26,14 @@ ArgFramework *initArgFramework(int nbArg)
 {
     ArgFramework *af = (ArgFramework *)malloc(sizeof(ArgFramework));
     af->nbArg = nbArg;
-    af->listeAdj = (Liste *)malloc(nbArg * sizeof(Liste));
+    af->succAdj = (Liste *)malloc(nbArg * sizeof(Liste));
+    af->predAdj = (Liste *)malloc(nbArg * sizeof(Liste));
     af->tab = (char **)malloc(nbArg * sizeof(char *));
 
     for (int i = 0; i < nbArg; i++)
     {
-        af->listeAdj[i] = initListe();
+        af->succAdj[i] = initListe();
+        af->predAdj[i] = initListe();
         af->tab[i] = NULL;
     }
     return af;
@@ -42,7 +44,15 @@ void freeArgFramework(ArgFramework *af)
     for (int i = 0; i < af->nbArg; i++)
     {
         free(af->tab[i]);
-        Liste l = af->listeAdj[i];
+        Liste l = af->succAdj[i];
+        while (!estVideListe(l))
+        {
+            Liste tmp = l;
+            l = suivantListe(l);
+            free(tmp);
+        }
+
+        l = af->predAdj[i];
         while (!estVideListe(l))
         {
             Liste tmp = l;
@@ -50,7 +60,8 @@ void freeArgFramework(ArgFramework *af)
             free(tmp);
         }
     }
-    free(af->listeAdj);
+    free(af->succAdj);
+    free(af->predAdj);
     free(af->tab);
     free(af);
 }

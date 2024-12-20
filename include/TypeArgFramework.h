@@ -4,7 +4,8 @@
 typedef struct ArgFramework
 {
     int nbArg;
-    Liste* listeAdj;
+    Liste* succAdj;
+    Liste* predAdj;
     char** tab;
 } ArgFramework;
 

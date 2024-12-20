@@ -18,7 +18,7 @@ Liste createCelListe()
     return tmp;
 }
 
-int donneeSuccListe(Liste l)
+int donneeListe(Liste l)
 {
     return l->somSucc;
 }
@@ -53,7 +53,7 @@ void afficheListe(Liste l)
     int numSom;
     while (!estVideListe(l))
     {
-        numSom = donneeSuccListe(l);
+        numSom = donneeListe(l);
         printf("(%d)", numSom);
         l = suivantListe(l);
         if (!estVideListe(l))
@@ -62,6 +62,19 @@ void afficheListe(Liste l)
         }
     }
     printf("\n");
+}
+
+int rechercheElementListe(int numeroSom, Liste l)
+{
+    if (estVideListe(l))
+    {
+        return 0;
+    }
+    if (l->somSucc == numeroSom)
+    {
+        return 1;
+    }
+    return rechercheElementListe(numeroSom, suivantListe(l));
 }
 
 Liste inserTeteListe(int numeroSom, Liste l)
