@@ -82,7 +82,7 @@ Liste inserQueueListe(int numeroSom, Liste l)
     else
     {
         Liste dernier = dernierListe(l);
-        dernier->succSuiv = inserTeteListe(numeroSom, suivantListe(l));
+        dernier->succSuiv = inserTeteListe(numeroSom, suivantListe(dernier));
     }
     return l;
 }
