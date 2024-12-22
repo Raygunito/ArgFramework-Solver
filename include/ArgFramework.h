@@ -17,4 +17,8 @@ int findArgumentIndex(char* arg, ArgFramework* af);
 ArgFramework *initArgFramework(int nbArg);
 void freeArgFramework(ArgFramework *af);
 
+int allAttackersOUT(int index, Label *labs, ArgFramework *af);
+int oneAttackersIN(int index, Label *labs, ArgFramework *af);
+void doCaminadaLabeling(Label *labs, ArgFramework *af);
+
 #endif

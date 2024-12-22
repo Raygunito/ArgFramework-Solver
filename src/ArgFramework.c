@@ -65,3 +65,60 @@ void freeArgFramework(ArgFramework *af)
     free(af->tab);
     free(af);
 }
+
+int allAttackersOUT(int index, Label *labs, ArgFramework *af)
+{
+    Liste pred = af->predAdj[index];
+    while ((!estVideListe(pred)) && labs[pred->somSucc] == OUT)
+    {
+        pred = suivantListe(pred);
+    }
+    if (estVideListe(pred))
+    {
+        return 1;
+    }
+    return 0;
+}
+
+int oneAttackersIN(int index, Label *labs, ArgFramework *af)
+{
+    Liste pred = af->predAdj[index];
+    while ((!estVideListe(pred)) && labs[pred->somSucc] != IN)
+    {
+        pred = suivantListe(pred);
+    }
+    // there is someone who attacks my Arg
+    if (!estVideListe(pred))
+    {
+        return 1;
+    }
+    return 0;
+}
+
+void doCaminadaLabeling(Label *labs, ArgFramework *af)
+{
+    int n = af->nbArg;
+    int i = 0;
+    int hasChange = 0;
+    do
+    {
+        i = 0;
+        hasChange = 0;
+        while (i < n && labs[i] == UNDECIDED)
+        {
+
+            if (allAttackersOUT(i, labs, af))
+            {
+                labs[i] = IN;
+                hasChange = 1;
+            }
+            else if (oneAttackersIN(i, labs, af))
+            {
+                labs[i] = OUT;
+                hasChange = 1;
+            }
+
+            i++;
+        }
+    } while (hasChange);
+}
