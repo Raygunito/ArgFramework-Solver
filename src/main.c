@@ -3,7 +3,6 @@
 #include "Liste.h"
 #include "Utils.h"
 #include "ArgFramework.h"
-// #include "NaiveWay.h"
 
 int main(int argc, char *argv[])
 {

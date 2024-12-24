@@ -91,14 +91,6 @@ void printLabelAF(Label *labels, ArgFramework *af)
     }
 }
 
-/**
- * @brief vérifie que tous les attaquants de index sont OUT
- *
- * @param index
- * @param labs
- * @param af
- * @return int
- */
 int allAttackersOUT(int index, Label *labs, ArgFramework *af)
 {
     Liste pred = af->predAdj[index];
@@ -172,6 +164,7 @@ void handleSECO(Label *labels, ArgFramework *af)
 {
     int n = af->nbArg;
     int i = 0;
+
     int hasChange = 0;
     do
     {
@@ -195,34 +188,20 @@ void handleSECO(Label *labels, ArgFramework *af)
         }
     } while (hasChange);
 
-    printf("[");
-    int first = 1;
-    for (int i = 0; i < n; i++)
-    {
-        if (labels[i] == IN)
-        {
-            if (!first)
-            {
-                printf(",");
-            }
-            printf("%s", af->tab[i]);
-            first = 0;
-        }
-    }
-    printf("]\n");
+    printOnlyIN(labels, af);
 }
 
 void handleSEST(Label *labels, ArgFramework *af)
 {
     // first pass
     doCaminadaLabeling(labels, af);
-    int n = af->nbArg;
-    if (containsUNDEC(labels, n))
+
+    if (containsUNDEC(labels, af->nbArg))
     {
-        int count;
-        int *undecArgs = pinpointUNDEC(labels, af, &count);
-        int res = backtrackST(labels, af, undecArgs, count, 0);
-        if (res)
+        int undecCount;
+        int *undecArgs = pinpointUNDEC(labels, af, &undecCount);
+        // found one stable extension ? ok print it, end
+        if (backtrackST(labels, af, undecArgs, undecCount, 0))
         {
             printOnlyIN(labels, af);
         }
@@ -253,13 +232,9 @@ void handleDCST(Label *l, ArgFramework *af, char *query)
         for (int i = 0; i < count; i++)
         {
             // reset label
-            for (int i = 0; i < af->nbArg; i++)
-            {
-                lcopy[i] = l[i];
-            }
-            int res = backtrackST(lcopy, af, undecArgs, count, i);
-            // if query is IN at least once then we can break;
-            if (res && lcopy[target] == IN)
+            memcpy(lcopy, l, n * sizeof(Label));
+            // if we found a stable extension AND if query is IN at least once then we can break;
+            if (backtrackST(lcopy, af, undecArgs, count, i) && lcopy[target] == IN)
             {
                 free(undecArgs);
                 free(lcopy);
@@ -273,14 +248,7 @@ void handleDCST(Label *l, ArgFramework *af, char *query)
     }
     else
     {
-        if (l[target] == IN)
-        {
-            printf("YES\n");
-        }
-        else
-        {
-            printf("NO\n");
-        }
+        printf(l[target] == IN ? "YES\n" : "NO\n");
     }
 }
 
@@ -299,13 +267,10 @@ void handleDSST(Label *l, ArgFramework *af, char *query)
         for (int i = 0; i < count; i++)
         {
             // reset label
-            for (int i = 0; i < af->nbArg; i++)
-            {
-                lcopy[i] = l[i];
-            }
-            int res = backtrackST(lcopy, af, undecArgs, count, i);
+            memcpy(lcopy, l, n * sizeof(Label));
+
             // we have a stable extension , and query is OUT at least once then we can break;
-            if (res && lcopy[target] == OUT)
+            if (backtrackST(lcopy, af, undecArgs, count, i) && lcopy[target] == OUT)
             {
                 free(undecArgs);
                 free(lcopy);
@@ -319,14 +284,7 @@ void handleDSST(Label *l, ArgFramework *af, char *query)
     }
     else
     {
-        if (l[target] == IN)
-        {
-            printf("YES\n");
-        }
-        else
-        {
-            printf("NO\n");
-        }
+        printf(l[target] == IN ? "YES\n" : "NO\n");
     }
 }
 
@@ -387,12 +345,14 @@ int backtrackST(Label *l, ArgFramework *af, int *undecArg, int undecCount, int c
             // there is still some undec
             int nb;
             int *undecArray = pinpointUNDEC(l, af, &nb);
+            // we found a stable extension with the remaining UNDEC
             if (backtrackST(l, af, undecArray, nb, 0))
             {
                 free(undecArray);
                 return 1;
             }
             free(undecArray);
+            // didn't found a stable extension
             return 0;
         }
         else
@@ -402,6 +362,7 @@ int backtrackST(Label *l, ArgFramework *af, int *undecArg, int undecCount, int c
             {
                 return 1;
             }
+            // something illegal like OUT=>OUT or IN=>IN
             return 0;
         }
     }
@@ -410,27 +371,25 @@ int backtrackST(Label *l, ArgFramework *af, int *undecArg, int undecCount, int c
     int argIndex = undecArg[currentIndex];
     Label *lcopy = copyArray(l, af->nbArg);
     lcopy[argIndex] = IN;
+    // spread the newly IN
     doCaminadaLabeling(lcopy, af);
     if (backtrackST(lcopy, af, undecArg, undecCount, currentIndex + 1))
     {
-        for (int i = 0; i < af->nbArg; i++)
-        {
-            l[i] = lcopy[i]; // Save the state of lcopy into l
-        }
+        // save found stable extension to original
+        memcpy(l, lcopy, af->nbArg * sizeof(Label));
         free(lcopy);
-        return 1; // If we found a valid stable extension, return success
+        return 1; // we found a valid stable extension, return success
     }
 
     free(lcopy);
     lcopy = copyArray(l, af->nbArg);
     lcopy[argIndex] = OUT;
+    // spread the newly OUT
     doCaminadaLabeling(lcopy, af);
     if (backtrackST(lcopy, af, undecArg, undecCount, currentIndex + 1))
     {
-        for (int i = 0; i < af->nbArg; i++)
-        {
-            l[i] = lcopy[i]; // Save the state of lcopy into l
-        }
+        // save found stable extension to original
+        memcpy(l, lcopy, af->nbArg * sizeof(Label));
         free(lcopy);
         return 1;
     }
@@ -441,6 +400,7 @@ int backtrackST(Label *l, ArgFramework *af, int *undecArg, int undecCount, int c
 
 int isStableExtension(Label *labs, ArgFramework *af)
 {
+    // it is more like "isLegalLabeling" to be honest since we don't care about UNDEC just legal
     for (int i = 0; i < af->nbArg; i++)
     {
         if (labs[i] == OUT && !oneAttackersIN(i, labs, af))
@@ -458,7 +418,7 @@ int isStableExtension(Label *labs, ArgFramework *af)
 
 void handleDCCO(Label *labels, ArgFramework *af, char *query)
 {
-    doCaminadaLabeling(labels,af);
+    doCaminadaLabeling(labels, af);
     int target = findArgumentIndex(query, af);
     int n = af->nbArg;
     int count;
@@ -467,12 +427,8 @@ void handleDCCO(Label *labels, ArgFramework *af, char *query)
 
     for (int i = 0; i < count; i++)
     {
-        for (int j = 0; j < n; j++)
-        {
-            lcopy[j] = labels[j];
-        }
-        int res = backtrackST(lcopy, af, undecArgs, count, i);
-        if (res && lcopy[target] == IN)
+        memcpy(lcopy, labels, n * sizeof(Label));
+        if (backtrackST(lcopy, af, undecArgs, count, i) && lcopy[target] == IN)
         {
             printf("YES\n");
             free(undecArgs);
@@ -487,13 +443,13 @@ void handleDCCO(Label *labels, ArgFramework *af, char *query)
 
 void handleDSCO(Label *labels, ArgFramework *af, char *query)
 {
-    doCaminadaLabeling(labels,af);
-    if (containsUNDEC(labels,af->nbArg))
+    doCaminadaLabeling(labels, af);
+    if (containsUNDEC(labels, af->nbArg))
     {
         printf("NO\n");
         return;
     }
-    
+
     int target = findArgumentIndex(query, af);
     int n = af->nbArg;
     int count;
@@ -502,12 +458,8 @@ void handleDSCO(Label *labels, ArgFramework *af, char *query)
 
     for (int i = 0; i < count; i++)
     {
-        for (int j = 0; j < n; j++)
-        {
-            lcopy[j] = labels[j];
-        }
-        int res = backtrackST(lcopy, af, undecArgs, count, i);
-        if (res && lcopy[target] == OUT)
+        memcpy(lcopy, labels, n * sizeof(Label));
+        if (backtrackST(lcopy, af, undecArgs, count, i) && lcopy[target] == OUT)
         {
             printf("NO\n");
             free(undecArgs);
