@@ -5,6 +5,9 @@
 #include <string.h>
 #include <stdio.h>
 
+/// @brief Initialise les labels à UNDEC
+/// @param labels tableau de label
+/// @param size nombre d'élément
 void initializeLabels(Label *labels, int size)
 {
     for (int i = 0; i < size; i++)
@@ -13,6 +16,10 @@ void initializeLabels(Label *labels, int size)
     }
 }
 
+/// @brief Retourne l'index de l'argument "arg" dans af->tab[?]
+/// @param arg nom de l'argument
+/// @param af système d'argumentation
+/// @return la position de l'argument dans le système d'argumentation
 int findArgumentIndex(char *arg, ArgFramework *af)
 {
     for (int i = 0; i < af->nbArg; i++)
@@ -25,6 +32,13 @@ int findArgumentIndex(char *arg, ArgFramework *af)
     return -1;
 }
 
+/**
+ * @brief initialise et alloue le système d'argumentation avec la
+ * bonne taille
+ *
+ * @param nbArg nombre d'argument total
+ * @return ArgFramework*
+ */
 ArgFramework *initArgFramework(int nbArg)
 {
     ArgFramework *af = (ArgFramework *)malloc(sizeof(ArgFramework));
@@ -42,6 +56,8 @@ ArgFramework *initArgFramework(int nbArg)
     return af;
 }
 
+/// @brief Libère proprement l'AS
+/// @param af Système d'argumentation
 void freeArgFramework(ArgFramework *af)
 {
     for (int i = 0; i < af->nbArg; i++)
@@ -69,6 +85,9 @@ void freeArgFramework(ArgFramework *af)
     free(af);
 }
 
+/// @brief Affiche les labels pour le debugging
+/// @param labels tableau de labels de l'AS
+/// @param af Système d'argumentation
 void printLabelAF(Label *labels, ArgFramework *af)
 {
     int n = af->nbArg;
@@ -91,6 +110,14 @@ void printLabelAF(Label *labels, ArgFramework *af)
     }
 }
 
+/**
+ * @brief Vérifie si tous les prédécesseurs de index sont OUT
+ *
+ * @param index noeud où on doit vérifier ses prédecesseurs
+ * @param labs tableau de labels de l'AS
+ * @param af Système d'argumentation
+ * @return int 1 si tous les attaquants de index sont OUT
+ */
 int allAttackersOUT(int index, Label *labs, ArgFramework *af)
 {
     Liste pred = af->predAdj[index];
@@ -105,6 +132,14 @@ int allAttackersOUT(int index, Label *labs, ArgFramework *af)
     return 1; // all attacker out
 }
 
+/**
+ * @brief Vérifie si au moins un attaquant de l'argument est IN.
+ *
+ * @param index Index de l'argument
+ * @param labs Tableau des labels
+ * @param af Système d'argumentation
+ * @return 1 si un attaquant est IN, 0 sinon.
+ */
 int oneAttackersIN(int index, Label *labs, ArgFramework *af)
 {
     Liste pred = af->predAdj[index];
@@ -120,6 +155,12 @@ int oneAttackersIN(int index, Label *labs, ArgFramework *af)
     return 0; // false
 }
 
+/**
+ * @brief Effectue le labeling selon la méthode de Caminada.
+ *
+ * @param labs Tableau des labels
+ * @param af Système d'argumentation
+ */
 void doCaminadaLabeling(Label *labs, ArgFramework *af)
 {
     int n = af->nbArg;
@@ -148,6 +189,13 @@ void doCaminadaLabeling(Label *labs, ArgFramework *af)
     } while (hasChange);
 }
 
+/**
+ * @brief Vérifie si un argument existe dans le système d'argumentation
+ *
+ * @param af Système d'argumentation
+ * @param queryArgument Argument à rechercher
+ * @return 1 si l'argument existe, 0 sinon
+ */
 int argumentExists(ArgFramework *af, char *queryArgument)
 {
     for (int i = 0; i < af->nbArg; i++)
@@ -160,6 +208,13 @@ int argumentExists(ArgFramework *af, char *queryArgument)
     return 0; // Argument not found
 }
 
+/**
+ * @brief Trouve une extension complète. on peut avoir []
+ * si il y a des cycles, ou un ensemble si acyclique.
+ *
+ * @param labels Tableau des labels.
+ * @param af Système d'argumentation.
+ */
 void handleSECO(Label *labels, ArgFramework *af)
 {
     int n = af->nbArg;
@@ -191,6 +246,14 @@ void handleSECO(Label *labels, ArgFramework *af)
     printOnlyIN(labels, af);
 }
 
+/**
+ * @brief Trouve une extension stable avec la méthode par
+ * backtracking, jusqu'à trouver un labeling ou il n'y a pas
+ * de UNDEC, ou bien aucun extension stable "NO"
+ *
+ * @param labels Tableau des labels.
+ * @param af Système d'argumentation.
+ */
 void handleSEST(Label *labels, ArgFramework *af)
 {
     // first pass
@@ -218,6 +281,14 @@ void handleSEST(Label *labels, ArgFramework *af)
 }
 
 // Credulous Stable = query is in at least one stable extension
+/**
+ * @brief Cherche si query est dans au moins 1 extension stable.
+ * Méthode par backtracking. Affiche "YES" ou "NO"
+ *
+ * @param l Tableau des labels.
+ * @param af Système d'argumentation.
+ * @param query Argument à vérifier.
+ */
 void handleDCST(Label *l, ArgFramework *af, char *query)
 {
     // first pass
@@ -253,6 +324,15 @@ void handleDCST(Label *l, ArgFramework *af, char *query)
 }
 
 // Skeptical Stable = query is IN in all possible stable extension
+/**
+ * @brief Cherche si query est dans toutes les extensions stables.
+ * Méthode par backtracking. Affiche "YES" ou "NO". Pour vérifier si
+ * c'est dans toutes les extensions on parcourt tous les UNDEC qui reste
+ * en testant chaqu'un leur tour.
+ * @param l Tableau des labels.
+ * @param af Système d'argumentation.
+ * @param query Argument à vérifier.
+ */
 void handleDSST(Label *l, ArgFramework *af, char *query)
 {
     // first pass
@@ -288,6 +368,13 @@ void handleDSST(Label *l, ArgFramework *af, char *query)
     }
 }
 
+/**
+ * @brief Vérifie si le tableau contient des labels UNDECIDED.
+ *
+ * @param labs Tableau des labels.
+ * @param size Taille du tableau.
+ * @return 1 si un label est UNDECIDED, 0 sinon.
+ */
 int containsUNDEC(Label *labs, int size)
 {
     for (int i = 0; i < size; i++)
@@ -300,6 +387,12 @@ int containsUNDEC(Label *labs, int size)
     return 0; // false
 }
 
+/**
+ * @brief Affiche uniquement les arguments avec le label IN.
+ *
+ * @param labels Tableau des labels.
+ * @param af Système d'argumentation.
+ */
 void printOnlyIN(Label *labels, ArgFramework *af)
 {
     printf("[");
@@ -319,6 +412,14 @@ void printOnlyIN(Label *labels, ArgFramework *af)
     printf("]\n");
 }
 
+/**
+ * @brief Identifie les arguments marqués UNDECIDED.
+ *
+ * @param l Tableau des labels.
+ * @param af Système d'argumentation.
+ * @param count Pointeur vers le compteur des arguments UNDECIDED.
+ * @return Tableau des indices UNDECIDED.
+ */
 int *pinpointUNDEC(Label *l, ArgFramework *af, int *count)
 {
     int n = af->nbArg;
@@ -335,6 +436,34 @@ int *pinpointUNDEC(Label *l, ArgFramework *af, int *count)
     return arrayIndex;
 }
 
+/**
+ * @brief Backtrack pour trouver une extension stable.
+ * @param l Tableau des labels.
+ * @param af Système d'argumentation.
+ * @param undecArg Tableau des indices UNDECIDED.
+ * @param undecCount Nombre d'UNDECIDED.
+ * @param currentIndex Index actuel dans le backtrack.
+ * @return 1 si une extension stable est trouvée, 0 sinon.
+ *
+ * ### Détails de l'algorithme :
+ *
+ * - Cas terminal :
+ *
+ *  - Lorsque `currentIndex` atteint `undecCount`, tous les arguments UNDECIDED ont été assignés.
+ *  - Si des labels UNDECIDED subsistent, la fonction les traite via un nouvel appel de backtrack.
+ *  - Si il n'y a aucun UNDECIDED, on vérifie si la configuration actuelle est une extension stable.
+ *
+ * - Exploration récursive :
+ *
+ *   - Pour chaque argument UNDECIDED à l'indice `currentIndex` :
+ *     1. Le label est temporairement défini à IN :
+ *        - Le système argumentation est mis à jour en propagant ce choix avec `doCaminadaLabeling`.
+ *        - Si cette configuration est valide, l'exploration continue avec l'index suivant.
+ *     2. Le label est ensuite temporairement défini à OUT :
+ *        - Les conséquences de ce choix sont propagées.
+ *        - Si cette configuration est valide, l'exploration continue avec l'index suivant.
+ *   - Si ni IN ni OUT ne permettent de construire une extension stable, la fonction retourne 0.
+ */
 int backtrackST(Label *l, ArgFramework *af, int *undecArg, int undecCount, int currentIndex)
 {
     // end case
@@ -406,6 +535,13 @@ int backtrackST(Label *l, ArgFramework *af, int *undecArg, int undecCount, int c
     return 0;
 }
 
+/**
+ * @brief Vérifie si le labeling est légal. (et non "Stable")
+ *
+ * @param labs Tableau des labels.
+ * @param af Système d'argumentation.
+ * @return 1 si l'extension est valide, 0 sinon.
+ */
 int isStableExtension(Label *labs, ArgFramework *af)
 {
     // it is more like "isLegalLabeling" to be honest since we don't care about UNDEC just legal
@@ -424,6 +560,14 @@ int isStableExtension(Label *labs, ArgFramework *af)
     return 1; // Valid stable extension
 }
 
+/**
+ * @brief Cherche si query est dans au moins 1 extension complète.
+ * Méthode par backtracking. Affiche "YES" ou "NO". Ici on abuse du fait
+ * qu'une extension stable est une extension complète. (optimisable)
+ * @param labels Tableau des labels.
+ * @param af Système d'argumentation.
+ * @param query Argument à vérifier.
+ */
 void handleDCCO(Label *labels, ArgFramework *af, char *query)
 {
     doCaminadaLabeling(labels, af);
@@ -449,6 +593,16 @@ void handleDCCO(Label *labels, ArgFramework *af, char *query)
     free(lcopy);
 }
 
+/**
+ * @brief Cherche si query est dans toutes les extensions complètes.
+ * Méthode par backtracking. Affiche "YES" ou "NO". Pour vérifier si
+ * c'est dans toutes les extensions on parcourt tous les UNDEC qui reste
+ * en testant chaqu'un leur tour. Ici on abuse du fait
+ * qu'une extension stable est une extension complète. (optimisable)
+ * @param labels Tableau des labels.
+ * @param af Système d'argumentation.
+ * @param query Argument à vérifier.
+ */
 void handleDSCO(Label *labels, ArgFramework *af, char *query)
 {
     doCaminadaLabeling(labels, af);

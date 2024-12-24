@@ -8,7 +8,14 @@
 
 static int somSuivant(int n, int *visite);
 
-// recupere le chemin du fichier, change la valeur de size et char** est un tableau de string
+/**
+ * @brief Recupere les arguments et les stocke dans buffer (tableau 2D "tableau de string"),
+ * size indique le nombre d'argument trouvé et stocké. Ne vérifie pas si le nom est "att" ou "arg"
+ *
+ * @param chemin path vers le fichier
+ * @param size taille du nombre d'argument trouvé
+ * @param buff buffer pour stocker le nom des arguments
+ */
 void recupArgument(char *chemin, int *size, char ***buff)
 {
     FILE *file = fopen(chemin, "r");
@@ -39,6 +46,9 @@ void recupArgument(char *chemin, int *size, char ***buff)
     fclose(file);
 }
 
+/// @brief Retourne le nombre d'argument arg(X) trouvé
+/// @param chemin path vers le fichier
+/// @return int le nombre d'argument
 int nbArgument(char *chemin)
 {
     FILE *file = fopen(chemin, "r");
@@ -62,6 +72,9 @@ int nbArgument(char *chemin)
     return count;
 }
 
+/// @brief retourne le contenu de arg(...)
+/// @param line la ligne complète
+/// @return char* le string contenu dans arg()
 char *extractArgument(char *line)
 {
     if (strncmp(line, "arg(", 4) != 0)
@@ -79,6 +92,15 @@ char *extractArgument(char *line)
     return NULL;
 }
 
+/**
+ * @brief Remplis le système d'argumentation qui contient déjà les arguments
+ * (mais pas les attaques) avec les attaques sous la forme de 2 listes d'adjacence
+ * chaque Argument possède une liste des successeurs et une liste des prédécesseurs.
+ * Ici, nous n'acceptons pas les self-attack et les duplicate
+ *
+ * @param fileName
+ * @param af
+ */
 void createAdjacencyList(char *fileName, ArgFramework *af)
 {
     FILE *file = fopen(fileName, "r");
@@ -142,7 +164,13 @@ void createAdjacencyList(char *fileName, ArgFramework *af)
     fclose(file);
 }
 
-
+/**
+ * @brief Alloue et copie le tableau de label dans le nouveau
+ *
+ * @param original l'original
+ * @param size le nombre d'élément
+ * @return Label* la copie
+ */
 Label *copyArray(Label *original, int size)
 {
     Label *copy = malloc(size * sizeof(Label));
@@ -155,6 +183,13 @@ Label *copyArray(Label *original, int size)
     return copy;
 }
 
+/**
+ * @brief Depth-First Search, détecte si un cycle est présent
+ *
+ * @param sd starting node, SommetDépart
+ * @param g Graph
+ * @param cycleDetected 1 si il y a un cycle, 0 sinon
+ */
 void parcoursProfondeur(int sd, ArgFramework *g, int *cycleDetected)
 {
     int n = g->nbArg;
@@ -198,6 +233,15 @@ void parcoursProfondeur(int sd, ArgFramework *g, int *cycleDetected)
     free(inRecursion);
 }
 
+/** @brief DFS Recursive call, function complémentaire à parcoursProfondeur, permet de faire
+ * le parcours en profondeur, en gardant en mémoire les noeuds visité au cours d'1 chemin
+ * @param s currentNode/sommet actuel
+ * @param visite tableau des noeuds visité
+ * @param inRecursion tableau des noeuds visité au cours d'1 chemin
+ * @param g Graph
+ * @param nbSomVisite traque le nombre de sommet visité pour le tableau visite
+ * @return int 1 cycle, 0 otherwise
+ */
 int reParcoursProfondeur(int s, int *visite, int *inRecursion, ArgFramework *g, int *nbSomVisite)
 {
     // if already in the recursion stack
