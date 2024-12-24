@@ -373,12 +373,16 @@ int backtrackST(Label *l, ArgFramework *af, int *undecArg, int undecCount, int c
     lcopy[argIndex] = IN;
     // spread the newly IN
     doCaminadaLabeling(lcopy, af);
-    if (backtrackST(lcopy, af, undecArg, undecCount, currentIndex + 1))
+    // if its legal we go in otherwise there is a IN=>IN or OUT=>OUT somewhere
+    if (isStableExtension(lcopy, af))
     {
-        // save found stable extension to original
-        memcpy(l, lcopy, af->nbArg * sizeof(Label));
-        free(lcopy);
-        return 1; // we found a valid stable extension, return success
+        if (backtrackST(lcopy, af, undecArg, undecCount, currentIndex + 1))
+        {
+            // save found stable extension to original
+            memcpy(l, lcopy, af->nbArg * sizeof(Label));
+            free(lcopy);
+            return 1; // we found a valid stable extension, return success
+        }
     }
 
     free(lcopy);
@@ -386,12 +390,16 @@ int backtrackST(Label *l, ArgFramework *af, int *undecArg, int undecCount, int c
     lcopy[argIndex] = OUT;
     // spread the newly OUT
     doCaminadaLabeling(lcopy, af);
-    if (backtrackST(lcopy, af, undecArg, undecCount, currentIndex + 1))
+    // if its legal we go in otherwise there is a IN=>IN or OUT=>OUT somewhere
+    if (isStableExtension(lcopy, af))
     {
-        // save found stable extension to original
-        memcpy(l, lcopy, af->nbArg * sizeof(Label));
-        free(lcopy);
-        return 1;
+        if (backtrackST(lcopy, af, undecArg, undecCount, currentIndex + 1))
+        {
+            // save found stable extension to original
+            memcpy(l, lcopy, af->nbArg * sizeof(Label));
+            free(lcopy);
+            return 1;
+        }
     }
 
     free(lcopy);

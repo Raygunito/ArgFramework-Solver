@@ -8,14 +8,14 @@ int main(int argc, char *argv[])
 {
     if (argc < 4)
     {
-        fprintf(stderr, "Usage: %s -p <problem_type> -f <file_path> [-a <argument>]\n", argv[0]);
-        fprintf(stderr, "Problem types:\n");
-        fprintf(stderr, "  SE-CO : Give a complete extension of the argumentation framework.\n");
-        fprintf(stderr, "  DC-CO : Determine if <argument> belongs to a complete extension.\n");
-        fprintf(stderr, "  DS-CO : Determine if <argument> belongs to all complete extensions.\n");
-        fprintf(stderr, "  SE-ST : Give a stable extension of the argumentation framework or NO.\n");
-        fprintf(stderr, "  DC-ST : Determine if <argument> belongs to a stable extension.\n");
-        fprintf(stderr, "  DS-ST : Determine if <argument> belongs to all stable extensions.\n");
+        printf("Usage: %s -p <problem_type> -f <file_path> [-a <argument>]\n", argv[0]);
+        printf("Problem types:\n");
+        printf("  SE-CO : Give a complete extension of the argumentation framework.\n");
+        printf("  DC-CO : Determine if <argument> belongs to a complete extension.\n");
+        printf("  DS-CO : Determine if <argument> belongs to all complete extensions.\n");
+        printf("  SE-ST : Give a stable extension of the argumentation framework or NO.\n");
+        printf("  DC-ST : Determine if <argument> belongs to a stable extension.\n");
+        printf("  DS-ST : Determine if <argument> belongs to all stable extensions.\n");
         return EXIT_FAILURE;
     }
 
@@ -45,11 +45,11 @@ int main(int argc, char *argv[])
     case 'S':
         if (!hasCycle)
         {
-            doCaminadaLabeling(labels,af);
-            printOnlyIN(labels,af);
+            doCaminadaLabeling(labels, af);
+            printOnlyIN(labels, af);
             break;
         }
-        
+
         if (strcmp(problemType, "SE-CO") == 0)
         {
             handleSECO(labels, af);
@@ -72,19 +72,19 @@ int main(int argc, char *argv[])
         }
         if (strcmp(problemType, "DC-CO") == 0)
         {
-            handleDCCO( labels,af, queryArgument);
+            handleDCCO(labels, af, queryArgument);
         }
         else if (strcmp(problemType, "DS-CO") == 0)
         {
-            handleDSCO( labels,af, queryArgument);
+            handleDSCO(labels, af, queryArgument);
         }
         else if (strcmp(problemType, "DC-ST") == 0)
         {
-            handleDCST( labels,af, queryArgument);
+            handleDCST(labels, af, queryArgument);
         }
         else if (strcmp(problemType, "DS-ST") == 0)
         {
-            handleDSST( labels,af, queryArgument);
+            handleDSST(labels, af, queryArgument);
         }
         else
         {
