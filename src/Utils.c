@@ -142,6 +142,19 @@ void createAdjacencyList(char *fileName, ArgFramework *af)
     fclose(file);
 }
 
+
+Label *copyArray(Label *original, int size)
+{
+    Label *copy = malloc(size * sizeof(Label));
+    if (copy == NULL)
+    {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(1);
+    }
+    memcpy(copy, original, size * sizeof(Label));
+    return copy;
+}
+
 void parcoursProfondeur(int sd, ArgFramework *g, int *cycleDetected)
 {
     int n = g->nbArg;

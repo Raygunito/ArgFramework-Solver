@@ -3,7 +3,7 @@ SRC_FOLDER=src# contains .c
 BIN_FOLDER=bin# contains .o
 
 CC = gcc
-CFLAGS = -Wall -I$(INC_FOLDER)
+CFLAGS = -g -Wall -I$(INC_FOLDER)
 
 # ArgSolver or ArgSolver.exe depend of OS
 TARGET=ArgSolver
