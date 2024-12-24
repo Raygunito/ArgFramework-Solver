@@ -44,6 +44,13 @@ int main(int argc, char *argv[])
     switch (problemType[0])
     {
     case 'S':
+        if (!hasCycle)
+        {
+            doCaminadaLabeling(labels,af);
+            printOnlyIN(labels,af);
+            break;
+        }
+        
         if (strcmp(problemType, "SE-CO") == 0)
         {
             handleSECO(labels, af);
@@ -66,19 +73,19 @@ int main(int argc, char *argv[])
         }
         if (strcmp(problemType, "DC-CO") == 0)
         {
-            // handleDCCO( labels,af, queryArgument);
+            handleDCCO( labels,af, queryArgument);
         }
         else if (strcmp(problemType, "DS-CO") == 0)
         {
-            // handleDSCO( labels,af, queryArgument);
+            handleDSCO( labels,af, queryArgument);
         }
         else if (strcmp(problemType, "DC-ST") == 0)
         {
-            // handleDCST( labels,af, queryArgument);
+            handleDCST( labels,af, queryArgument);
         }
         else if (strcmp(problemType, "DS-ST") == 0)
         {
-            // handleDSST( labels,af, queryArgument);
+            handleDSST( labels,af, queryArgument);
         }
         else
         {
@@ -88,21 +95,6 @@ int main(int argc, char *argv[])
     default:
         printf("Unknown problem type.\n");
     }
-    // doCaminadaLabeling(labels, af);
-
-    /* NaiveWay import
-    printf("Stable Extensions:\n");
-    calculateStableExtensions(af);
-
-    printf("Complete Extensions:\n");
-    calculateCompleteExtensions(af);
-    */
-
-    /* cycle detection
-    int cycle = 0;
-    parcoursProfondeur(0, af, &cycle);
-    printf("Detection cycle : %s\n", cycle == 1 ? "true" : "false");
-    */
 
     free(labels);
     freeArgFramework(af);

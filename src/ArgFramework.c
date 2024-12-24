@@ -93,11 +93,11 @@ void printLabelAF(Label *labels, ArgFramework *af)
 
 /**
  * @brief vérifie que tous les attaquants de index sont OUT
- * 
- * @param index 
- * @param labs 
- * @param af 
- * @return int 
+ *
+ * @param index
+ * @param labs
+ * @param af
+ * @return int
  */
 int allAttackersOUT(int index, Label *labs, ArgFramework *af)
 {
@@ -123,9 +123,9 @@ int oneAttackersIN(int index, Label *labs, ArgFramework *af)
     // there is someone who attacks my Arg
     if (!estVideListe(pred))
     {
-        return 1; //true
+        return 1; // true
     }
-    return 0; //false
+    return 0; // false
 }
 
 void doCaminadaLabeling(Label *labs, ArgFramework *af)
@@ -154,25 +154,6 @@ void doCaminadaLabeling(Label *labs, ArgFramework *af)
             i++;
         }
     } while (hasChange);
-}
-
-int *noeudAvecPlusAtk(Label *labels, ArgFramework *af)
-{
-    int n = af->nbArg;
-    int *tabAtk = (int *)malloc(n * sizeof(int));
-    for (int i = 0; i < n; i++)
-    {
-        if (labels[i] != UNDECIDED)
-        {
-            tabAtk[i] = 0;
-        }
-        else
-        {
-            tabAtk[i] = tailleSuccListe(af->succAdj[i]);
-        }
-    }
-
-    return tabAtk;
 }
 
 int argumentExists(ArgFramework *af, char *queryArgument)
@@ -254,6 +235,98 @@ void handleSEST(Label *labels, ArgFramework *af)
     else
     {
         printOnlyIN(labels, af);
+    }
+}
+
+// Credulous Stable = query is in at least one stable extension
+void handleDCST(Label *l, ArgFramework *af, char *query)
+{
+    // first pass
+    doCaminadaLabeling(l, af);
+    int n = af->nbArg;
+    int target = findArgumentIndex(query, af);
+    if (containsUNDEC(l, n))
+    {
+        int count;
+        int *undecArgs = pinpointUNDEC(l, af, &count);
+        Label *lcopy = copyArray(l, af->nbArg);
+        for (int i = 0; i < count; i++)
+        {
+            // reset label
+            for (int i = 0; i < af->nbArg; i++)
+            {
+                lcopy[i] = l[i];
+            }
+            int res = backtrackST(lcopy, af, undecArgs, count, i);
+            // if query is IN at least once then we can break;
+            if (res && lcopy[target] == IN)
+            {
+                free(undecArgs);
+                free(lcopy);
+                printf("YES\n");
+                return;
+            }
+        }
+        printf("NO\n");
+        free(lcopy);
+        free(undecArgs);
+    }
+    else
+    {
+        if (l[target] == IN)
+        {
+            printf("YES\n");
+        }
+        else
+        {
+            printf("NO\n");
+        }
+    }
+}
+
+// Skeptical Stable = query is IN in all possible stable extension
+void handleDSST(Label *l, ArgFramework *af, char *query)
+{
+    // first pass
+    doCaminadaLabeling(l, af);
+    int n = af->nbArg;
+    int target = findArgumentIndex(query, af);
+    if (containsUNDEC(l, n))
+    {
+        int count;
+        int *undecArgs = pinpointUNDEC(l, af, &count);
+        Label *lcopy = copyArray(l, af->nbArg);
+        for (int i = 0; i < count; i++)
+        {
+            // reset label
+            for (int i = 0; i < af->nbArg; i++)
+            {
+                lcopy[i] = l[i];
+            }
+            int res = backtrackST(lcopy, af, undecArgs, count, i);
+            // we have a stable extension , and query is OUT at least once then we can break;
+            if (res && lcopy[target] == OUT)
+            {
+                free(undecArgs);
+                free(lcopy);
+                printf("NO\n");
+                return;
+            }
+        }
+        printf("YES\n");
+        free(lcopy);
+        free(undecArgs);
+    }
+    else
+    {
+        if (l[target] == IN)
+        {
+            printf("YES\n");
+        }
+        else
+        {
+            printf("NO\n");
+        }
     }
 }
 
@@ -381,4 +454,68 @@ int isStableExtension(Label *labs, ArgFramework *af)
         }
     }
     return 1; // Valid stable extension
+}
+
+void handleDCCO(Label *labels, ArgFramework *af, char *query)
+{
+    doCaminadaLabeling(labels,af);
+    int target = findArgumentIndex(query, af);
+    int n = af->nbArg;
+    int count;
+    int *undecArgs = pinpointUNDEC(labels, af, &count);
+    Label *lcopy = copyArray(labels, n);
+
+    for (int i = 0; i < count; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            lcopy[j] = labels[j];
+        }
+        int res = backtrackST(lcopy, af, undecArgs, count, i);
+        if (res && lcopy[target] == IN)
+        {
+            printf("YES\n");
+            free(undecArgs);
+            free(lcopy);
+            return;
+        }
+    }
+    printf("NO\n");
+    free(undecArgs);
+    free(lcopy);
+}
+
+void handleDSCO(Label *labels, ArgFramework *af, char *query)
+{
+    doCaminadaLabeling(labels,af);
+    if (containsUNDEC(labels,af->nbArg))
+    {
+        printf("NO\n");
+        return;
+    }
+    
+    int target = findArgumentIndex(query, af);
+    int n = af->nbArg;
+    int count;
+    int *undecArgs = pinpointUNDEC(labels, af, &count);
+    Label *lcopy = copyArray(labels, n);
+
+    for (int i = 0; i < count; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            lcopy[j] = labels[j];
+        }
+        int res = backtrackST(lcopy, af, undecArgs, count, i);
+        if (res && lcopy[target] == OUT)
+        {
+            printf("NO\n");
+            free(undecArgs);
+            free(lcopy);
+            return;
+        }
+    }
+    printf("YES\n");
+    free(undecArgs);
+    free(lcopy);
 }

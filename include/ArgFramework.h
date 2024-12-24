@@ -22,11 +22,14 @@ void printLabelAF(Label *labels, ArgFramework *af);
 int allAttackersOUT(int index, Label *labs, ArgFramework *af);
 int oneAttackersIN(int index, Label *labs, ArgFramework *af);
 void doCaminadaLabeling(Label *labs, ArgFramework *af);
-int *noeudAvecPlusAtk(Label *labels, ArgFramework *af);
 
 int isStableExtension(Label *labs, ArgFramework *af);
 void handleSECO(Label *labels, ArgFramework *af);
 void handleSEST(Label *labels, ArgFramework *af);
+void handleDCST(Label *l, ArgFramework *af, char *query);
+void handleDSST(Label *l, ArgFramework *af, char *query);
+void handleDSCO(Label *labels, ArgFramework *af, char *query);
+void handleDCCO(Label *labels, ArgFramework *af, char *query);
 
 int containsUNDEC(Label *labs, int size);
 void printOnlyIN(Label *labels, ArgFramework *af);
