@@ -536,7 +536,7 @@ int backtrackST(Label *l, ArgFramework *af, int *undecArg, int undecCount, int c
 }
 
 /**
- * @brief Vérifie si le labeling est légal. (et non "Stable")
+ * @brief Vérifie si le labeling est légal.
  *
  * @param labs Tableau des labels.
  * @param af Système d'argumentation.
@@ -544,7 +544,7 @@ int backtrackST(Label *l, ArgFramework *af, int *undecArg, int undecCount, int c
  */
 int isLegalExtension(Label *labs, ArgFramework *af)
 {
-    // it is more like "isLegalLabeling" to be honest since we don't care about UNDEC just legal
+    // Initially called isStableExtension, but hey this code is more about whether the labeling is legal.
     for (int i = 0; i < af->nbArg; i++)
     {
         if (labs[i] == OUT && !oneAttackersIN(i, labs, af))
