@@ -217,32 +217,7 @@ int argumentExists(ArgFramework *af, char *queryArgument)
  */
 void handleSECO(Label *labels, ArgFramework *af)
 {
-    int n = af->nbArg;
-    int i = 0;
-
-    int hasChange = 0;
-    do
-    {
-        i = 0;
-        hasChange = 0;
-        while (i < n && labels[i] == UNDECIDED)
-        {
-
-            if (allAttackersOUT(i, labels, af))
-            {
-                labels[i] = IN;
-                hasChange = 1;
-            }
-            else if (oneAttackersIN(i, labels, af))
-            {
-                labels[i] = OUT;
-                hasChange = 1;
-            }
-
-            i++;
-        }
-    } while (hasChange);
-
+    doCaminadaLabeling(labels, af);
     printOnlyIN(labels, af);
 }
 
