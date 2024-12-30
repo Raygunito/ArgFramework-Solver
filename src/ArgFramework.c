@@ -487,7 +487,7 @@ int backtrackST(Label *l, ArgFramework *af, int *undecArg, int undecCount, int c
         else
         {
             // we have no UNDEC
-            if (isStableExtension(l, af))
+            if (isLegalExtension(l, af))
             {
                 return 1;
             }
@@ -503,7 +503,7 @@ int backtrackST(Label *l, ArgFramework *af, int *undecArg, int undecCount, int c
     // spread the newly IN
     doCaminadaLabeling(lcopy, af);
     // if its legal we go in otherwise there is a IN=>IN or OUT=>OUT somewhere
-    if (isStableExtension(lcopy, af))
+    if (isLegalExtension(lcopy, af))
     {
         if (backtrackST(lcopy, af, undecArg, undecCount, currentIndex + 1))
         {
@@ -520,7 +520,7 @@ int backtrackST(Label *l, ArgFramework *af, int *undecArg, int undecCount, int c
     // spread the newly OUT
     doCaminadaLabeling(lcopy, af);
     // if its legal we go in otherwise there is a IN=>IN or OUT=>OUT somewhere
-    if (isStableExtension(lcopy, af))
+    if (isLegalExtension(lcopy, af))
     {
         if (backtrackST(lcopy, af, undecArg, undecCount, currentIndex + 1))
         {
@@ -542,7 +542,7 @@ int backtrackST(Label *l, ArgFramework *af, int *undecArg, int undecCount, int c
  * @param af Système d'argumentation.
  * @return 1 si l'extension est valide, 0 sinon.
  */
-int isStableExtension(Label *labs, ArgFramework *af)
+int isLegalExtension(Label *labs, ArgFramework *af)
 {
     // it is more like "isLegalLabeling" to be honest since we don't care about UNDEC just legal
     for (int i = 0; i < af->nbArg; i++)
