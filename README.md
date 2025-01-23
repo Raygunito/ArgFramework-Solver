@@ -65,14 +65,14 @@ att(b,c).
 
 To compute a complete extension : 
 ```
-./ArgSolver -p SE-CO -f simple_af.af
+./ArgSolver -p SE-CO -f simple_af.apx
 
 output: [a,c]
 ```
 
 Or determine if argument `a` belongs to all skeptical extensions :
 ```
-./ArgSolver -p DS-ST -f simple_af.af
+./ArgSolver -p DS-ST -f simple_af.apx
 
 output: YES
 ```
